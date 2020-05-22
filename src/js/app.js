@@ -2,7 +2,13 @@ const originFormEle = document.querySelector(".origin-form");
 const destinationFromEle = document.querySelector(".destination-form");
 const originlistEle = document.querySelector(".origins");
 const destinationlistEle = document.querySelector(".destinations");
+const tripButtonEle = document.querySelector("button");
+let originCordLong;
+let originCordLat;
+let destinationCordLong;
+let destinationCordLat;
 const access_token = 'pk.eyJ1Ijoic2FnYXJ0aGtrYXIiLCJhIjoiY2thNWx4d2loMDFvazNscGJldzJpaXc1MCJ9.Xl71FBbAakX8PzwqfbX1DQ';
+const transitKey = `yywi4QKxinQ3PzCgMK6u`;
 
 getLocation(originFormEle, originlistEle);
 getLocation(destinationFromEle, destinationlistEle);
@@ -38,7 +44,8 @@ originlistEle.addEventListener("click", function(e) {
         sle.classList.remove("selected");
     })
     listELe.classList.add("selected")
-    originCord(listELe.dataset.long, listELe.dataset.lat);
+    originCordLong = listELe.dataset.long;
+    originCordLat = listELe.dataset.lat;
 })
 
 destinationlistEle.addEventListener("click", function(e) {
@@ -48,5 +55,14 @@ destinationlistEle.addEventListener("click", function(e) {
         sle.classList.remove("selected");
     })
     listELe.classList.add("selected")
-    destinationCord(listELe.dataset.long, listELe.dataset.lat);
+    destinationCordLong = listELe.dataset.long;
+    destinationCordLat = listELe.dataset.lat;
+})
+
+tripButtonEle.addEventListener("click", function(e) {
+    fetch(`https://api.winnipegtransit.com/v3/trip-planner.json?api-key=${transitKey}&origin=geo/${originCordLat},${originCordLong}&destination=geo/${destinationCordLat},${destinationCordLong}`)
+        .then(resp => resp.json())
+        .then(data => {
+            console.log(data);
+        })
 })
