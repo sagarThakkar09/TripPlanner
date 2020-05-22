@@ -16,13 +16,13 @@ function getLocation(location, list) {
 }
 
 function displayResult(query, list) {
-    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${access_token}&limit=10&&bbox=-97.325875,49.766204,-96.953987,49.99275`)
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${access_token}&limit=10&bbox=-97.325875,49.766204,-96.953987,49.99275`)
         .then(resp => resp.json())
         .then(data => {
             list.innerHTML = "";
             locationsHTML = ""
             data.features.forEach(location => {
-                locationsHTML += `<li data-long="${location.center[0]}" data-lat="${location.center[1]}" class="selected">
+                locationsHTML += `<li data-long="${location.center[0]}" data-lat="${location.center[1]}" class="">
                   <div class="name">${location.text}</div>
                   <div>${location.properties.address === undefined ? location.context[2].text:location.properties.address}</div>
                 </li>`
@@ -30,3 +30,23 @@ function displayResult(query, list) {
             list.innerHTML = locationsHTML;
         })
 }
+
+originlistEle.addEventListener("click", function(e) {
+    const listELe = e.target.closest('li');
+    const liEle = document.querySelectorAll(".origins li");
+    liEle.forEach(sle => {
+        sle.classList.remove("selected");
+    })
+    listELe.classList.add("selected")
+    originCord(listELe.dataset.long, listELe.dataset.lat);
+})
+
+destinationlistEle.addEventListener("click", function(e) {
+    const listELe = e.target.closest('li');
+    const liEle = document.querySelectorAll(".destinations li");
+    liEle.forEach(sle => {
+        sle.classList.remove("selected");
+    })
+    listELe.classList.add("selected")
+    destinationCord(listELe.dataset.long, listELe.dataset.lat);
+})
