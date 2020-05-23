@@ -3,10 +3,13 @@ const destinationFromEle = document.querySelector(".destination-form");
 const originlistEle = document.querySelector(".origins");
 const destinationlistEle = document.querySelector(".destinations");
 const tripButtonEle = document.querySelector("button");
+const myTripEle = document.querySelector(".my-trip");
+
 let originCordLong;
 let originCordLat;
 let destinationCordLong;
 let destinationCordLat;
+
 const access_token = 'pk.eyJ1Ijoic2FnYXJ0aGtrYXIiLCJhIjoiY2thNWx4d2loMDFvazNscGJldzJpaXc1MCJ9.Xl71FBbAakX8PzwqfbX1DQ';
 const transitKey = `yywi4QKxinQ3PzCgMK6u`;
 
@@ -40,8 +43,8 @@ function displayResult(query, list) {
 originlistEle.addEventListener("click", function(e) {
     const listELe = e.target.closest('li');
     const liEle = document.querySelectorAll(".origins li");
-    liEle.forEach(sle => {
-        sle.classList.remove("selected");
+    liEle.forEach(select => {
+        select.classList.remove("selected");
     })
     listELe.classList.add("selected")
     originCordLong = listELe.dataset.long;
@@ -51,8 +54,8 @@ originlistEle.addEventListener("click", function(e) {
 destinationlistEle.addEventListener("click", function(e) {
     const listELe = e.target.closest('li');
     const liEle = document.querySelectorAll(".destinations li");
-    liEle.forEach(sle => {
-        sle.classList.remove("selected");
+    liEle.forEach(select => {
+        select.classList.remove("selected");
     })
     listELe.classList.add("selected")
     destinationCordLong = listELe.dataset.long;
@@ -63,6 +66,38 @@ tripButtonEle.addEventListener("click", function(e) {
     fetch(`https://api.winnipegtransit.com/v3/trip-planner.json?api-key=${transitKey}&origin=geo/${originCordLat},${originCordLong}&destination=geo/${destinationCordLat},${destinationCordLong}`)
         .then(resp => resp.json())
         .then(data => {
-            console.log(data);
+            planTrip(data.plans[0]);
         })
 })
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1)
+}
+
+function planTrip(data) {
+    myTripEle.innerHTML = "";
+    tripHtml = "";
+    const tripPlan = data.segments;
+    console.log(tripPlan);
+    let string = ""
+    tripPlan.forEach(trip => {
+                if (trip.type === "walk") {
+                    string = `${trip.type} for ${trip.times.durations.total} minutes to ${trip.to.stop ===undefined ? "destination":`stop #${trip.to.stop.key} - ${trip.to.stop.name}`} `
+            tripHtml += `<li>
+                <i class="fas fa-walking" aria-hidden="true"></i>
+                    ${string.capitalize()}
+                 </li>`
+        } else if (trip.type === "ride") {
+            string = `${trip.type} the ${trip.route.name === undefined ? trip.route.number : trip.route.name} for ${trip.times.durations.total} minutes.`
+            tripHtml += `<li><i class="fas fa-bus" aria-hidden="true"></i>
+                     ${string.capitalize()}
+                          </li>`
+        } else if (trip.type === "transfer") {
+            string = `${trip.type} from stop #${trip.from.stop.key} - ${trip.from.stop.name} to stop #${trip.to.stop.key} - ${trip.to.stop.name}.`
+            tripHtml += `  <li><i class="fas fa-ticket-alt" aria-hidden="true"></i>
+              ${string.capitalize()}
+              </li>`
+        }
+        myTripEle.innerHTML = tripHtml;
+    })
+
+}
